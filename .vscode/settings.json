@@ -1,0 +1,20 @@
+{
+    "files.associations": {
+        "osapi.h": "c",
+        "i2c_master.h": "c",
+        "gpio.h": "c",
+        "user_interface.h": "c",
+        "user_config.h": "c",
+        "string.h": "c",
+        "cdefs.h": "c",
+        "gpio_key.h": "c",
+        "mem.h": "c",
+        "fprint1016.h": "c",
+        "lock.h": "c",
+        "uart.h": "c",
+        "mqtt.h": "c",
+        "ip_addr.h": "c",
+        "queue.h": "c",
+        "1016c.h": "c"
+    }
+}

@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/app/include",
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/app/include/**",
+                "C:/ToolChain/8266_NON/lib/gcc/i686-pc-cygwin/5.4.0/include"
+            ],
+            "forcedInclude": [],
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "C:\\AiThinkerIDE_V0.5\\cygwin\\bin\\gcc.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}
