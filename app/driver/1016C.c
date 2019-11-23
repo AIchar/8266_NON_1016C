@@ -144,10 +144,8 @@ void uart_rx_cb(uint8* pData_buf, uint16 data_len) {
 				}else
 				{
 					INFO("[ERROR]Get Image error\r\n");
-					// led_yellow(LED_ON);
 					led_set(LED_COLOR_YELLOW,LED_ON);
 					os_timer_arm(&OS_Timer_LedClose,1000,0);
-					os_timer_arm(&OS_Timer_Wakeup,30,0);
 				}
 				break;
 			case CMD_GENERATE:	//生成特征
@@ -159,9 +157,7 @@ void uart_rx_cb(uint8* pData_buf, uint16 data_len) {
 				}else
 				{
 					INFO("[ERROR]Generate error\r\n");
-					os_timer_arm(&OS_Timer_Wakeup,30,0);
 				}
-				
 				break;			
 			case CMD_SEARCH:	//1:N验证
 				if (DataPacket.dataLen==0x05 && DataPacket.data[0]==ERR_SUCCESS)
@@ -178,7 +174,6 @@ void uart_rx_cb(uint8* pData_buf, uint16 data_len) {
 					callback(VERIFY_FAIL,0);
 				}
 				os_timer_arm(&OS_Timer_LedClose,1000,0);
-				os_timer_arm(&OS_Timer_Wakeup,30,0);
 				break;
 			case CMD_DEL_CHAR:	//删除指纹
 				if (DataPacket.dataLen==0x02)
@@ -186,21 +181,19 @@ void uart_rx_cb(uint8* pData_buf, uint16 data_len) {
 					if (DataPacket.data[0]==ERR_SUCCESS)
 					{
 						led_set(LED_COLOR_GREEN,LED_BLINK_F);
-						os_timer_arm(&OS_Timer_LedClose,1500,0);
 						callback(DELETE_SUCCESS,0);
 					}else
 					{
 						led_set(LED_COLOR_RED,LED_BLINK_F);
-						os_timer_arm(&OS_Timer_LedClose,1500,0);
 						callback(DELETE_FAIL,0);
 					}
+					os_timer_arm(&OS_Timer_LedClose,1500,0);
 				}				
 				break;	
 			case CMD_SLED_CTRL:
 				break;			
 			default:
 				INFO("[ERROR]Unknow error\r\n");
-				os_timer_arm(&OS_Timer_Wakeup,30,0);
 				break;
 			}
 		}
@@ -214,7 +207,6 @@ void uart_rx_cb(uint8* pData_buf, uint16 data_len) {
 			case CMD_GET_EMPTY_ID:	//获取可用ID
 				if (DataPacket.dataLen==4 && DataPacket.data[0]==ERR_SUCCESS)
 				{
-					// led_cyan(LED_ON);
 					led_set(LED_COLOR_CYAN,LED_ON);
 					fprintID=DataPacket.data[2];
 					INFO("[INFO]Fingerprint ID: %d\r\n",fprintID);
@@ -233,7 +225,6 @@ void uart_rx_cb(uint8* pData_buf, uint16 data_len) {
 				}else
 				{
 					INFO("[ERROR]Get Image error\r\n");
-					os_timer_arm(&OS_Timer_Wakeup,30,0);
 				}
 				break;
 			case CMD_GENERATE:	//生成特征
@@ -247,15 +238,12 @@ void uart_rx_cb(uint8* pData_buf, uint16 data_len) {
 					}else
 					{
 						led_set(LED_COLOR_CYAN,LED_ON);
-						os_timer_arm(&OS_Timer_Wakeup,30,0);
 					}
 					
 				}else
 				{
 					INFO("[ERROR]Generate error\r\n");
-					os_timer_arm(&OS_Timer_Wakeup,30,0);
 				}
-				
 				break;				
 			case CMD_MERGE:	//合成模板
 				if (DataPacket.dataLen==0x02 && DataPacket.data[0]==ERR_SUCCESS){
@@ -275,7 +263,6 @@ void uart_rx_cb(uint8* pData_buf, uint16 data_len) {
 					callback(REGISTER_SUCCESS,fprintID);
 					fprintID=0;
 					led_set(LED_COLOR_GREEN,LED_ON);
-					os_timer_arm(&OS_Timer_Wakeup,30,0);
 					os_timer_arm(&OS_Timer_LedClose,1500,0);
 					fp_verify();
 				}
@@ -305,17 +292,10 @@ void ICACHE_FLASH_ATTR wakeupHandle() {
 		switch (fprint_mode)
 		{
 		case VERIFY_MODE:	//验证模式
-			led_set(LED_COLOR_BLUE,LED_ON);
-			os_delay_us(50000);
-			send_cmd(CMD_GET_IMAGE, 0, NULL);
-			break;
 		case REGISTER_MODE:	//注册模式
 			led_set(LED_COLOR_BLUE,LED_ON);
 			os_delay_us(50000);
 			send_cmd(CMD_GET_IMAGE, 0, NULL);
-			break;
-		default:
-			os_timer_arm(&OS_Timer_Wakeup,30,0);
 			break;
 		}
 		
@@ -323,12 +303,8 @@ void ICACHE_FLASH_ATTR wakeupHandle() {
 	//手指松开
 	else if (Key_State==0 && Key_press==0)
 	{
-		Key_State=1;	
-		os_timer_arm(&OS_Timer_Wakeup,30,0);
-	}else
-	{
-		os_timer_arm(&OS_Timer_Wakeup,30,0);
-	} 
+		Key_State=1;
+	}
 }
 
 
@@ -352,7 +328,7 @@ void fprint1016_init(fingerprint_cb func_cb){
 
     os_timer_disarm(&OS_Timer_Wakeup);
     os_timer_setfn(&OS_Timer_Wakeup, (os_timer_func_t *)wakeupHandle, NULL);
-    os_timer_arm(&OS_Timer_Wakeup, 30, 0);
+    os_timer_arm(&OS_Timer_Wakeup, 40, 1);
 
 }
 
