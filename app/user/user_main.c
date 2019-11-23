@@ -68,6 +68,37 @@ LOCAL void ICACHE_FLASH_ATTR key1ShortPress(void) {
 
 
 /**
+ * 指纹回调
+ */
+void ICACHE_FLASH_ATTR fingerprintCb(FprintStatus status,u8 ID){
+	switch (status)
+	{
+	u8 mqttSendData[32]={0};
+	case VERIFY_SUCCESS:
+		INFO("[INFO]VERIFY SUCCESS  FP_ID:%02D\r\n",ID);
+		break;
+	case VERIFY_FAIL:
+		INFO("[INFO]VERIFY FAIL\r\n");
+		break;
+	case REGISTER_SUCCESS:
+		INFO("[INFO]REGISTER SUCCESS FP_ID:%02D\r\n",ID);
+		break;
+	case REGISTER_FAIL:
+		INFO("[INFO]REGISTER FAIL\r\n");
+		break;
+	case DELETE_SUCCESS:
+		INFO("[INFO]DELETE SUCCESS\r\n");
+		break;
+	case DELETE_FAIL:
+		INFO("[INFO]DELETE FAIL\r\n");
+		break;
+	default:
+		break;
+	}
+}
+
+
+/**
  * 	按键初始化
  */
 LOCAL void ICACHE_FLASH_ATTR keyInit(void) {
@@ -87,6 +118,6 @@ void user_init(void) {
 
 	keyInit();
 	
-	fprint1016_init();
+	fprint1016_init(fingerprintCb);
 }
 

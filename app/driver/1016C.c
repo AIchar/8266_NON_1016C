@@ -12,7 +12,7 @@
 #include "driver/uart.h"
 #include "driver/1016C.h"
 
-#define FPRINT_DEBUG_ON
+// #define FPRINT_DEBUG_ON 0
 
 #if defined(FPRINT_DEBUG_ON)
 #define INFO( format, ... ) os_printf( format, ## __VA_ARGS__ )
@@ -23,7 +23,10 @@
 os_timer_t OS_Timer_Wakeup;	//检测手指
 os_timer_t OS_Timer_LedClose;	//关闭LED
 
+fingerprint_cb callback;
+
 uint8 fprint_mode = VERIFY_MODE;	//工作模式
+u8 max_fp_num = 32;
 
 /**
  * 校验数据和
@@ -166,15 +169,33 @@ void uart_rx_cb(uint8* pData_buf, uint16 data_len) {
 					//通过验证
 					INFO("[INFO]Finger verify pass | finger ID:%d\r\n",DataPacket.data[2]);
 					led_set(LED_COLOR_GREEN,LED_ON);
+					callback(VERIFY_SUCCESS,DataPacket.data[2]);
 				}else
 				{
 					//验证失败
 					led_set(LED_COLOR_RED,LED_ON);
 					INFO("[INFO]Finger verify fail\r\n");
+					callback(VERIFY_FAIL,0);
 				}
 				os_timer_arm(&OS_Timer_LedClose,1000,0);
 				os_timer_arm(&OS_Timer_Wakeup,30,0);
 				break;
+			case CMD_DEL_CHAR:	//删除指纹
+				if (DataPacket.dataLen==0x02)
+				{
+					if (DataPacket.data[0]==ERR_SUCCESS)
+					{
+						led_set(LED_COLOR_GREEN,LED_BLINK_F);
+						os_timer_arm(&OS_Timer_LedClose,1500,0);
+						callback(DELETE_SUCCESS,0);
+					}else
+					{
+						led_set(LED_COLOR_RED,LED_BLINK_F);
+						os_timer_arm(&OS_Timer_LedClose,1500,0);
+						callback(DELETE_FAIL,0);
+					}
+				}				
+				break;	
 			case CMD_SLED_CTRL:
 				break;			
 			default:
@@ -251,6 +272,7 @@ void uart_rx_cb(uint8* pData_buf, uint16 data_len) {
 			case CMD_STORE_CHAR:
 				if (DataPacket.dataLen==0x02 && DataPacket.data[0]==ERR_SUCCESS){
 					INFO("[INFO]Fingerprint register success | Finger ID:%d\r\n",fprintID);
+					callback(REGISTER_SUCCESS,fprintID);
 					fprintID=0;
 					led_set(LED_COLOR_GREEN,LED_ON);
 					os_timer_arm(&OS_Timer_Wakeup,30,0);
@@ -313,12 +335,16 @@ void ICACHE_FLASH_ATTR wakeupHandle() {
 /**
  * 初始化
  */
-void fprint1016_init(void){
+void fprint1016_init(fingerprint_cb func_cb){
     
     //设置串口接收回调
 	set_uart_cb(uart_rx_cb);
     UART_SetPrintPort(1);
 
+	if (func_cb!=NULL)
+		{
+			callback =  func_cb;
+		}
 	gpio_disout_init(wakeup);
 
 	os_timer_disarm(&OS_Timer_LedClose);

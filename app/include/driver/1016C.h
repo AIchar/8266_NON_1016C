@@ -73,6 +73,17 @@ typedef enum {
 } led_color;
 
 typedef enum {
+    VERIFY_SUCCESS = 0x00,
+    VERIFY_FAIL,
+    REGISTER_SUCCESS,
+    REGISTER_FAIL,
+    DELETE_SUCCESS,
+    DELETE_FAIL
+} FprintStatus;
+
+typedef void (*fingerprint_cb)(FprintStatus status, u8 id);
+
+typedef enum {
     VERIFY_MODE = 0x00,
     REGISTER_MODE,
     FREE_MODE
@@ -86,7 +97,7 @@ typedef struct _DATAPACKET_
 }DataPacket;
 
 
-void fprint1016_init(void);
+void fprint1016_init(fingerprint_cb func_cb);
 void register_fprint(void);
 void fp_mode_change(void);
 
