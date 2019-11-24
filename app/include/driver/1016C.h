@@ -105,9 +105,10 @@ void fp_mode_change(void);
 //LED控制
 void led_close();   //关闭所有LED
 void led_set(led_color color, led_mode status);
+void ICACHE_FLASH_ATTR close_timer(u32 time);
 
 //切换模式
-void fp_delete(u8 ID);  //删除指纹
+void fp_delete(u8 initialID,u8 endID);  //删除指纹
 void fp_register();     //注册指纹
 void fp_verify();       //验证指纹
 void fp_free();         //空闲模式

@@ -116,10 +116,10 @@ char ICACHE_FLASH_ATTR dataProces(u8 *src, DataPacket* rcData){
 /**
  * 删除指定ID指纹模板
  */
-void ICACHE_FLASH_ATTR fp_delete(u8 ID){
+void ICACHE_FLASH_ATTR fp_delete(u8 initialID,u8 endID){
 	u8 sendData[14]={0};
-	sendData[0]=ID;
-	sendData[2]=ID;
+	sendData[0]=initialID;
+	sendData[2]=endID;
 	send_cmd(CMD_DEL_CHAR,4,sendData);
 }
 
@@ -152,7 +152,7 @@ void uart_rx_cb(uint8* pData_buf, uint16 data_len) {
 				if (DataPacket.dataLen==0x02 && DataPacket.data[0]==ERR_SUCCESS)
 				{
 					sendData[2]=0X01;
-					sendData[4]=0x20;
+					sendData[4]=max_fp_num;
 					send_cmd(CMD_SEARCH,0x06,sendData);
 				}else
 				{
@@ -344,6 +344,16 @@ void ICACHE_FLASH_ATTR led_close(){
 
 
 /**
+ * 延时关闭led
+ */
+void ICACHE_FLASH_ATTR close_timer(u32 time){
+	os_timer_disarm(&OS_Timer_LedClose);
+	os_timer_arm(&OS_Timer_LedClose,time,0);
+}
+
+
+
+/**
  * 设置LED
  */
 void ICACHE_FLASH_ATTR led_set(led_color color, led_mode status){
@@ -361,7 +371,7 @@ void ICACHE_FLASH_ATTR fp_register(){
 	fprint_mode = REGISTER_MODE;
 	u8 sendData[14]={0};
 	sendData[0]=1;
-	sendData[2]=32;
+	sendData[2]=max_fp_num;
 	send_cmd(CMD_GET_EMPTY_ID, 4, sendData);
 	INFO("[INFO]Register mode\r\n");
 }
